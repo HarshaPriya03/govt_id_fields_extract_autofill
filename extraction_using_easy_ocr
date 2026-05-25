@@ -1,0 +1,11 @@
+import easyocr
+import cv2
+
+# Load image first, pass array instead of file path
+img = cv2.imread("/content/WhatsApp Image 2026-05-25 at 11.09.50 AM.jpeg")
+
+reader = easyocr.Reader(['en'])
+results = reader.readtext(img)
+
+for (bbox, text, prob) in results:
+    print(f"{text} (confidence: {prob:.2f})")
