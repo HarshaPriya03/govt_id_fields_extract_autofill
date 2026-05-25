@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>KYC Document Scanner</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+:root{
+  --bg:#f0f2f5;
+  --surface:#ffffff;
+  --surface2:#f7f8fa;
+  --border:#e2e5ea;
+  --border2:#d0d5de;
+  --text:#111827;
+  --text2:#4b5563;
+  --text3:#9ca3af;
+  --teal:#0d9488;
+  --teal-light:#e6faf8;
+  --teal-dark:#0a7a70;
+  --amber:#d97706;
+  --amber-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --blue:#2563eb;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),
+            0 1px 2px rgba(0,0,0,0.04);
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:24px 16px 60px;
+}
+
+.header{
+  max-width:1000px;
+  margin:0 auto 30px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.header-icon{
+  width:46px;
+  height:46px;
+  background:var(--teal);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.header h1{
+  font-size:22px;
+  font-weight:600;
+}
+
+.header p{
+  font-size:13px;
+  color:var(--text2);
+}
+
+.layout{
+  max-width:1000px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+@media(max-width:720px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.card-head{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.card-head-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--teal);
+}
+
+.card-head h2{
+  font-size:14px;
+  font-weight:600;
+}
+
+.card-head span{
+  margin-left:auto;
+  font-size:11px;
+  color:var(--text3);
+}
+
+.card-body{
+  padding:20px;
+}
+
+.upload-zone{
+  border:2px dashed var(--border2);
+  border-radius:var(--radius-sm);
+  padding:22px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.2s;
+  background:var(--surface2);
+  position:relative;
+  overflow:hidden;
+}
+
+.upload-zone:hover{
+  border-color:var(--teal);
+  background:var(--teal-light);
+}
+
+.upload-zone.drag-over{
+  border-color:var(--teal);
+  background:var(--teal-light);
+}
+
+.upload-zone.has-file{
+  border-style:solid;
+  border-color:var(--teal);
+  padding:0;
+}
+
+.upload-zone input[type=file]{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+  width:100%;
+  height:100%;
+}
+
+.upload-placeholder{
+  pointer-events:none;
+}
+
+.upload-icon{
+  font-size:28px;
+  margin-bottom:8px;
+}
+
+.upload-label{
+  font-size:14px;
+  font-weight:600;
+  color:var(--text2);
+}
+
+.upload-sub{
+  margin-top:5px;
+  font-size:11px;
+  color:var(--text3);
+}
+
+.upload-zone img{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  display:block;
+}
+
+.upload-file-name{
+  padding:8px 10px;
+  background:var(--teal-light);
+  border-top:1px solid rgba(13,148,136,0.15);
+  font-size:11px;
+  color:var(--teal-dark);
+  font-weight:600;
+}
+
+.doc-badge{
+  font-size:11px;
+  font-weight:600;
+  padding:4px 10px;
+  border-radius:20px;
+}
+
+.badge-pending{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text3);
+}
+
+.badge-done{
+  background:var(--green-light);
+  border:1px solid #bbf7d0;
+  color:var(--green);
+}
+
+.btn-extract{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:var(--radius-sm);
+  background:var(--teal);
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+  margin-top:16px;
+}
+
+.btn-extract:hover{
+  background:var(--teal-dark);
+}
+
+.btn-extract:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.progress-steps{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:18px;
+}
+
+.step{
+  padding:12px 14px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:var(--surface2);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.step.active{
+  background:var(--amber-light);
+}
+
+.step.done{
+  background:var(--green-light);
+}
+
+.step.error{
+  background:var(--red-light);
+}
+
+.form-section-label{
+  padding:12px 20px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+
+.form-fields{
+  padding:18px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.field label{
+  font-size:11px;
+  font-weight:600;
+  color:var(--text2);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.field input,
+.field textarea,
+.field select{
+  padding:10px 12px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border2);
+  font-size:13px;
+  outline:none;
+  font-family:'DM Sans',sans-serif;
+}
+
+.field textarea{
+  min-height:80px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:var(--teal);
+}
+
+.confidence-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+}
+
+.conf-high{
+  background:var(--green);
+}
+
+.conf-mid{
+  background:var(--amber);
+}
+
+.conf-low{
+  background:var(--red);
+}
+
+.conf-none{
+  background:var(--border2);
+}
+
+.form-actions{
+  padding:18px 20px;
+  border-top:1px solid var(--border);
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  padding:10px 16px;
+  border-radius:var(--radius-sm);
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-primary{
+  background:var(--teal);
+  color:#fff;
+  flex:1;
+}
+
+.btn-secondary{
+  background:var(--surface2);
+}
+
+.toast{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  background:#111;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:10px;
+  opacity:0;
+  transform:translateY(10px);
+  transition:0.2s;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.toast.success{
+  background:var(--green);
+}
+
+.toast.error{
+  background:var(--red);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-icon">🪪</div>
+
+  <div>
+    <h1>KYC Document Scanner</h1>
+    <p>Upload Aadhaar & PAN images to auto-fill KYC details</p>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- LEFT SIDE -->
+<div style="display:flex;flex-direction:column;gap:20px;">
+
+  <!-- Aadhaar -->
+  <div class="card">
+
+    <div class="card-head">
+      <div class="card-head-dot"></div>
+      <h2>Aadhaar Card</h2>
+
+      <span id="badge-aadhaar"
+            class="doc-badge badge-pending">
+        PENDING
+      </span>
+    </div>
+
+    <div class="card-body">
+
+      <div class="upload-zone"
+           id="zone-aadhaar"
+           ondragover="onDragOver(event,'aadhaar')"
+           ondragleave="onDragLeave('aadhaar')"
+           ondrop="onDrop(event,'aadhaar')">
+
+        <input type="file"
+               id="file-aadhaar"
+               accept="image/*"
+               onchange="onFileSelect(this,'aadhaar')">
+
+        <div class="upload-placeholder"
+             id="ph-aadhaar">
+
+          <div class="upload-icon">🪪</div>
+
+          <div class="upload-label">
+            Upload Aadhaar Image
+          </div>
+
+          <div class="upload-sub">
+            Front / Back / Both Sides / Rotated / Partial
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PAN -->
+  <div class="card">
+
+    <div class="card-head">
+      <div class="card-head-dot"
+           style="background:var(--amber)">
+      </div>
+
+      <h2>PAN Card</h2>
+
+      <span id="badge-pan"
+            class="doc-badge badge-pending">
+        PENDING
+      </span>
+    </div>
+
+    <div class="card-body">
+
+      <div class="upload-zone"
+           id="zone-pan"
+           ondragover="onDragOver(event,'pan')"
+           ondragleave="onDragLeave('pan')"
+           ondrop="onDrop(event,'pan')">
+
+        <input type="file"
+               id="file-pan"
+               accept="image/*"
+               onchange="onFileSelect(this,'pan')">
+
+        <div class="upload-placeholder"
+             id="ph-pan">
+
+          <div class="upload-icon">🪪</div>
+
+          <div class="upload-label">
+            Upload PAN Card
+          </div>
+
+          <div class="upload-sub">
+            Any angle / blurry / cropped supported
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <button class="btn-extract"
+          id="btn-extract"
+          onclick="extractAll()">
+
+    Extract & Auto-Fill
+
+  </button>
+
+  <!-- Progress -->
+  <div class="progress-steps"
+       id="progress-steps"
+       style="display:none">
+
+    <div class="step"
+         id="step-aadhaar">
+
+      <div>🪪</div>
+
+      <div style="flex:1">
+        Aadhaar Processing
+      </div>
+
+      <div class="step-status">
+        Waiting
+      </div>
+
+    </div>
+
+    <div class="step"
+         id="step-pan">
+
+      <div>🪪</div>
+
+      <div style="flex:1">
+        PAN Processing
+      </div>
+
+      <div class="step-status">
+        Waiting
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- RIGHT -->
+<div class="card">
+
+  <div class="card-head">
+    <div class="card-head-dot"
+         style="background:var(--blue)">
+    </div>
+
+    <h2>KYC Details</h2>
+
+    <span>Editable</span>
+  </div>
+
+  <!-- PERSONAL -->
+  <div class="form-section-label">
+    Personal Information
+  </div>
+
+  <div class="form-fields">
+
+    <div class="field">
+      <label>
+        <span class="confidence-dot conf-none"
+              id="cd-name"></span>
+        Full Name
+      </label>
+
+      <input type="text"
+             id="f-name">
+    </div>
+
+    <div class="form-row">
+
+      <div class="field">
+        <label>
+          <span class="confidence-dot conf-none"
+                id="cd-dob"></span>
+          Date of Birth
+        </label>
+
+        <input type="text"
+               id="f-dob">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="confidence-dot conf-none"
+                id="cd-gender"></span>
+          Gender
+        </label>
+
+        <select id="f-gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="field">
+      <label>
+        <span class="confidence-dot conf-none"
+              id="cd-father-name"></span>
+        Father's Name
+      </label>
+
+      <input type="text"
+             id="f-father-name">
+    </div>
+
+  </div>
+
+  <!-- DOCS -->
+  <div class="form-section-label">
+    Document Numbers
+  </div>
+
+  <div class="form-fields">
+
+    <div class="form-row">
+
+      <div class="field">
+        <label>
+          <span class="confidence-dot conf-none"
+                id="cd-aadhaar"></span>
+          Aadhaar Number
+        </label>
+
+        <input type="text"
+               id="f-aadhaar">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="confidence-dot conf-none"
+                id="cd-pan"></span>
+          PAN Number
+        </label>
+
+        <input type="text"
+               id="f-pan">
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ADDRESS -->
+  <div class="form-section-label">
+    Address
+  </div>
+
+  <div class="form-fields">
+
+    <div class="field">
+      <label>
+        <span class="confidence-dot conf-none"
+              id="cd-address"></span>
+        Address
+      </label>
+
+      <textarea id="f-address"></textarea>
+    </div>
+
+    <div class="field">
+      <label>
+        <span class="confidence-dot conf-none"
+              id="cd-pincode"></span>
+        Pincode
+      </label>
+
+      <input type="text"
+             id="f-pincode">
+    </div>
+
+  </div>
+
+  <div class="form-actions">
+
+    <button class="btn btn-secondary"
+            onclick="clearForm()">
+      Clear
+    </button>
+
+    <button class="btn btn-primary"
+            onclick="submitForm()">
+      Submit KYC
+    </button>
+
+  </div>
+
+</div>
+
+</div>
+
+<div class="toast"
+     id="toast">
+</div>
+
+<script>
+
+const files = {
+  aadhaar:null,
+  pan:null
+};
+
+function onDragOver(e,zoneId){
+  e.preventDefault();
+  document.getElementById('zone-'+zoneId)
+          .classList.add('drag-over');
+}
+
+function onDragLeave(zoneId){
+  document.getElementById('zone-'+zoneId)
+          .classList.remove('drag-over');
+}
+
+function onDrop(e,docType){
+  e.preventDefault();
+
+  document.getElementById('zone-'+docType)
+          .classList.remove('drag-over');
+
+  const file=e.dataTransfer.files[0];
+
+  if(file){
+    handleFile(file,docType);
+  }
+}
+
+function onFileSelect(input,docType){
+
+  if(input.files[0]){
+    handleFile(input.files[0],docType);
+  }
+}
+
+function handleFile(file,docType){
+
+  files[docType]=file;
+
+  const zone=document.getElementById('zone-'+docType);
+
+  const ph=document.getElementById('ph-'+docType);
+
+  const reader=new FileReader();
+
+  reader.onload=e=>{
+
+    ph.innerHTML=`
+      <img src="${e.target.result}">
+    `;
+
+    zone.classList.add('has-file');
+
+    zone.insertAdjacentHTML(
+      'beforeend',
+      `<div class="upload-file-name">
+         ✓ ${file.name}
+       </div>`
+    );
+  };
+
+  reader.readAsDataURL(file);
+}
+
+async function extractAll(){
+
+  const hasAny=files.aadhaar || files.pan;
+
+  if(!hasAny){
+    showToast('Upload at least one document.','error');
+    return;
+  }
+
+  const btn=document.getElementById('btn-extract');
+
+  btn.disabled=true;
+
+  btn.innerHTML='Extracting...';
+
+  document.getElementById('progress-steps')
+          .style.display='flex';
+
+  const docsToProcess=[
+    {
+      key:'aadhaar',
+      stepId:'step-aadhaar'
+    },
+    {
+      key:'pan',
+      stepId:'step-pan'
+    }
+  ];
+
+  let anySuccess=false;
+
+  for(const doc of docsToProcess){
+
+    if(!files[doc.key]) continue;
+
+    setStep(doc.stepId,'active','Processing...');
+
+    try{
+
+      const result=
+        await callExtract(
+          files[doc.key],
+          doc.key
+        );
+
+      fillForm(doc.key,result.data);
+
+      setStep(doc.stepId,'done','Done ✓');
+
+      anySuccess=true;
+
+    }catch(err){
+
+      console.error(err);
+
+      setStep(doc.stepId,'error','Failed ✗');
+    }
+  }
+
+  btn.disabled=false;
+
+  btn.innerHTML='Extract & Auto-Fill';
+
+  if(anySuccess)
+    showToast('Extraction complete!','success');
+  else
+    showToast('Extraction failed.','error');
+}
+
+async function callExtract(file,docType){
+
+  const fd=new FormData();
+
+  fd.append('image',file);
+
+  fd.append('doc_type',docType);
+
+  const res=await fetch('/extract',{
+    method:'POST',
+    body:fd
+  });
+
+  const json=await res.json();
+
+  if(!json.success)
+    throw new Error(json.error);
+
+  return json;
+}
+
+function fillForm(docType,data){
+
+  const conf=data.confidence || {};
+
+  if(docType==='aadhaar'){
+
+    setField('f-name',
+             data.name,
+             'cd-name',
+             conf.name);
+
+    setField('f-dob',
+             data.dob,
+             'cd-dob',
+             conf.dob);
+
+    setField('f-gender',
+             data.gender,
+             'cd-gender',
+             conf.gender,
+             true);
+
+    setField('f-aadhaar',
+             data.aadhaar_number,
+             'cd-aadhaar',
+             conf.aadhaar_number);
+
+    setField('f-address',
+             data.address,
+             'cd-address',
+             conf.address);
+
+    setField('f-pincode',
+             data.pincode,
+             'cd-pincode',
+             conf.pincode);
+
+    document.getElementById('badge-aadhaar')
+            .className='doc-badge badge-done';
+
+    document.getElementById('badge-aadhaar')
+            .textContent='EXTRACTED';
+  }
+
+  if(docType==='pan'){
+
+    setField('f-father-name',
+             data.father_name,
+             'cd-father-name',
+             conf.father_name);
+
+    setField('f-pan',
+             data.pan_number,
+             'cd-pan',
+             conf.pan_number);
+
+    document.getElementById('badge-pan')
+            .className='doc-badge badge-done';
+
+    document.getElementById('badge-pan')
+            .textContent='EXTRACTED';
+  }
+}
+
+function setField(fieldId,
+                  value,
+                  dotId,
+                  confidence,
+                  isSelect=false){
+
+  if(!value) return;
+
+  const el=document.getElementById(fieldId);
+
+  if(isSelect)
+    el.value=value;
+  else
+    el.value=value;
+
+  const dot=document.getElementById(dotId);
+
+  if(dot){
+
+    dot.className='confidence-dot '+
+      confClass(confidence);
+  }
+}
+
+function confClass(c){
+
+  if(c>=75)
+    return 'conf-high';
+
+  if(c>=45)
+    return 'conf-mid';
+
+  if(c>=1)
+    return 'conf-low';
+
+  return 'conf-none';
+}
+
+function setStep(stepId,state,status){
+
+  const el=document.getElementById(stepId);
+
+  el.className='step '+state;
+
+  el.querySelector('.step-status')
+    .textContent=status;
+}
+
+function clearForm(){
+
+  [
+    'f-name',
+    'f-dob',
+    'f-father-name',
+    'f-address',
+    'f-pincode',
+    'f-aadhaar',
+    'f-pan'
+  ].forEach(id=>{
+
+    document.getElementById(id).value='';
+  });
+
+  document.getElementById('f-gender').value='';
+
+  showToast('Form cleared');
+}
+
+function submitForm(){
+
+  showToast(
+    'KYC submitted successfully!',
+    'success'
+  );
+}
+
+function showToast(msg,type=''){
+
+  const t=document.getElementById('toast');
+
+  t.textContent=msg;
+
+  t.className='toast show '+type;
+
+  setTimeout(()=>{
+    t.className='toast';
+  },3000);
+}
+
+</script>
+
+</body>
+</html>
